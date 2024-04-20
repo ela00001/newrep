@@ -1,0 +1,67 @@
+
+#******************** Settings ************************
+
+
+
+Documentation    Testing the Project Management functionalities including CRUD operations (Create, Read, Update, Delete) on GitLab. This test suite ensures projects can be created, viewed, modified, and deleted successfully.
+Pre Condition    User is logged in and at the project creation page.
+Post Condition   User logs out or closes the browser.
+Tags             Project Management, CRUD
+
+ ************************ Variables  ************************
+
+
+${PROJECT_URL}                https://gitlab.com/projects/new
+${VALID_PROJECT_NAME}         New_Project_${get_random_string(5)}
+${TEMPLATE_PROJECT_NAME}      Template_Project_${get_random_string(5)}
+${UPDATED_PROJECT_NAME}       Updated_${VALID_PROJECT_NAME}
+${EXISTING_PROJECT_NAME}      Existing_Project
+${SUCCESS_MESSAGE_CREATION}   Project '${VALID_PROJECT_NAME}' was successfully created.
+${SUCCESS_MESSAGE_DELETION}   Project '${TEMPLATE_PROJECT_NAME}' was successfully deleted.
+
+
+
+
+#******************** Test Cases *************************
+
+*** Test Cases ***
+
+# Positive Test Cases
+
+Create Blank Project
+    [Documentation]    Verifies that a user can create a new blank project.
+    Navigate To Project Creation Page    ${PROJECT_URL}
+    Input Text    id=project_name_field    ${VALID_PROJECT_NAME}
+    Click Button  id=create_blank_project_button
+    Verify Page Should Contain    ${SUCCESS_MESSAGE_CREATION}
+
+Create Template Project
+    [Documentation]    Ensures that a user can create a new project from a template.
+    Navigate To Project Creation Page    ${PROJECT_URL}
+    Input Text    id=project_name_field    ${TEMPLATE_PROJECT_NAME}
+    Select Template    SomeTemplateName  # Assume some template is selectable
+    Click Button  id=create_project_from_template_button
+    Verify Page Should Contain    ${SUCCESS_MESSAGE_CREATION}
+
+Update Name of Template Project
+    [Documentation]    Tests updating the project name after creation from a template.
+    Navigate To Project Settings    ${PROJECT_URL}/${TEMPLATE_PROJECT_NAME}/edit
+    Input Text    id=project_name_field    ${UPDATED_PROJECT_NAME}
+    Click Button  id=update_project_button
+    Verify Page Should Contain    Project name updated to '${UPDATED_PROJECT_NAME}'
+
+Delete Template Project
+    [Documentation]    Verifies that a user can delete a project.
+    Navigate To Project Settings    ${PROJECT_URL}/${TEMPLATE_PROJECT_NAME}
+    Click Button  id=delete_project_button
+    Accept Confirmation    Are you sure?
+    Verify Page Should Contain    ${SUCCESS_MESSAGE_DELETION}
+
+# Negative Test Cases
+
+Create a Blank Project With the Same Name
+    [Documentation]    Attempts to create a new project using a name that already exists to test error handling.
+    Navigate To Project Creation Page    ${PROJECT_URL}
+    Input Text    id=project_name_field    ${EXISTING_PROJECT_NAME}  # Assuming the name is already taken
+    Click Button  id=create_blank_project_button
+    Verify Page Should Contain    Error: Project name already taken

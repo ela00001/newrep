@@ -1,0 +1,55 @@
+
+#******************** Settings ************************
+
+
+Documentation    Tests the Issue Management functionality on GitLab, covering CRUD operations (Create, Read, Update, Delete) for issues within a project.
+Pre Condition    User is logged in and has navigated to the issues page of an existing project.
+Post Condition   Optionally, clean up by closing the browser.
+Tags             Issue Management, CRUD
+
+
+************************ Variables ************************
+
+
+${ISSUE_URL}                https://gitlab.com/group-slug-here/project-slug-here/-/issues/new
+${EXISTING_PROJECT_URL}     https://gitlab.com/group-slug-here/project-slug-here/-/issues
+${ISSUE_TITLE}              Issue_${get_random_string(5)}
+${UPDATED_ISSUE_TITLE}      Updated_${ISSUE_TITLE}
+${SECOND_ISSUE_TITLE}       Second_Issue_${get_random_string(5)}
+${DELETION_CONFIRMATION}    Issue was successfully deleted.
+
+
+#******************** Test Cases *************************
+
+*** Test Cases ***
+
+# Positive Test Cases
+
+Create Issue
+    [Documentation]    Verifies that a user can create a new issue within a project.
+    Navigate To Issue Creation Page    ${ISSUE_URL}
+    Input Text    id=issue_title_field    ${ISSUE_TITLE}
+    Click Button  id=create_issue_button
+    Verify Page Should Contain    ${ISSUE_TITLE}
+
+Update Name of Issue
+    [Documentation]    Ensures that a user can update the title of an existing issue.
+    Navigate To Issue Page    ${EXISTING_PROJECT_URL}/issues/1
+    Click Button  id=edit_issue_button
+    Input Text    id=issue_title_field    ${UPDATED_ISSUE_TITLE}
+    Click Button  id=save_changes_button
+    Verify Page Should Contain    ${UPDATED_ISSUE_TITLE}
+
+Create Second Issue With Previous Updated Name
+    [Documentation]    Tests if a second issue can be created with the name of the first issue post-update.
+    Navigate To Issue Creation Page    ${ISSUE_URL}
+    Input Text    id=issue_title_field    ${UPDATED_ISSUE_TITLE}
+    Click Button  id=create_issue_button
+    Verify Page Should Contain    ${UPDATED_ISSUE_TITLE}
+
+Delete First Issue
+    [Documentation]    Verifies that a user can delete an issue.
+    Navigate To Issue Page    ${EXISTING_PROJECT_URL}/issues/1
+    Click Button  id=delete_issue_button
+    Accept Confirmation    Are you sure you want to delete this issue?
+    Verify Page Should Contain    ${DELETION_CONFIRMATION}

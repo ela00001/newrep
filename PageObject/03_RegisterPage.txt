@@ -1,0 +1,88 @@
+
+#******************** Settings ************************
+
+
+
+Documentation    Testing the user registration functionality at GitLab. This suite ensures that the registration process works correctly with 		valid inputs and appropriately handles invalid inputs and CAPTCHA.
+Pre Condition    Open Browser to the Registration Page
+Post Condition   Close Browser
+Tags             Registration, User Onboarding, TS-2-Registration
+
+
+
+************************ Variables ************************
+${REGISTRATION_URL}    https://gitlab.com/users/sign_up
+${VALID_USERNAME}      newuser_${get_random_string(5)}
+${VALID_EMAIL}         ${VALID_USERNAME}@example.com
+${VALID_PASSWORD}      Passw0rd!
+${EXISTING_USERNAME}   existinguser
+${EMPTY}               ${SPACE}  # Robot Framework built-in variable for an empty string
+${INVALID_EMAIL}       invalidemail
+${TEST_CAPTCHA}        dummycaptcha  # Assuming there's a testable or dummy CAPTCHA for automation purposes
+
+ 
+
+
+#******************** Test Cases *************************
+
+
+*** Test Cases ***
+
+# Positive Test Case
+Register User With Valid Credentials
+    [Documentation]    Verifies that a user can register with valid username, email, password, and CAPTCHA.
+    Navigate To Registration Page    ${REGISTRATION_URL}
+    Input Text    id=username_field    ${VALID_USERNAME}
+    Input Text    id=email_field       ${VALID_EMAIL}
+    Input Text    id=password_field    ${VALID_PASSWORD}
+    Input CAPTCHA ${TEST_CAPTCHA}      # This step assumes CAPTCHA can be automated in the test environment
+    Click Button  id=register_button
+    Verify Page Should Contain    Welcome, ${VALID_USERNAME}
+
+
+# Negative Test Cases
+
+Register User With Existing Username
+    [Documentation]    Checks that the system prevents registration with a username that already exists.
+    Navigate To Registration Page    ${REGISTRATION_URL}
+    Input Text    id=username_field    ${EXISTING_USERNAME}
+    Input Text    id=email_field       ${VALID_EMAIL}
+    Input Text    id=password_field    ${VALID_PASSWORD}
+    Input CAPTCHA ${TEST_CAPTCHA}
+    Click Button  id=register_button
+    Verify Page Should Contain    Username already taken
+
+
+Register User With Empty Password
+    [Documentation]    Verifies that registration requires a password and displays an error when the password field is left empty.
+    Navigate To Registration Page    ${REGISTRATION_URL}
+    Input Text    id=username_field    ${VALID_USERNAME}
+    Input Text    id=email_field       ${VALID_EMAIL}
+    Input Text    id=password_field    ${EMPTY}
+    Input CAPTCHA ${TEST_CAPTCHA}
+    Click Button  id=register_button
+    Verify Page Should Contain    This field is required
+
+
+
+Register User With Invalid Email
+    [Documentation]    Ensures that the email field validates the email format and shows an error for invalid emails.
+    Navigate To Registration Page    ${REGISTRATION_URL}
+    Input Text    id=username_field    ${VALID_USERNAME}
+    Input Text    id=email_field       ${INVALID_EMAIL}
+    Input Text    id=password_field    ${VALID_PASSWORD}
+    Input CAPTCHA ${TEST_CAPTCHA}
+    Click Button  id=register_button
+    Verify Page Should Contain    Invalid email format
+
+
+
+
+Register User Without CAPTCHA
+    [Documentation]    Tests the requirement for CAPTCHA completion by attempting to register without completing the CAPTCHA.
+    Navigate To Registration Page    ${REGISTRATION_URL}
+    Input Text    id=username_field    ${VALID_USERNAME}
+    Input Text    id=email_field       ${VALID_EMAIL}
+    Input Text    id=password_field    ${VALID_PASSWORD}
+    Click Button  id=register_button
+    Verify Page Should Contain    Please complete the CAPTCHA
